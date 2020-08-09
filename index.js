@@ -1,16 +1,27 @@
-const fetch = require('node-fetch')
-const { URLSearchParams } = require('url');
+// Imports the Google Cloud client library
+const { Translate } = require('@google-cloud/translate').v2
 
-const url = `https://translate.google.com/translate_a/single?client=at&dt=t&dt=ld&dt=qca&dt=rm&dt=bd&dj=1&hl=%25s&ie=UTF-8&oe=UTF-8&inputm=2&otf=2&iid=1dd3b944-fa62-4b55-b330-74909a99969e&`
-const sl = `de`
-const tl = `en`
-const q = `Hallo`
+// Instantiates a client
+const translate = new Translate()
 
-params.append('sl', encodeURIComponent(`${sl}`));
-params.append('tl', encodeURIComponent(`${tl}`));
-params.append('q', encodeURIComponent(`${q}`));
- 
-fetch(url, { method: 'POST', body: params, headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, })
-    .then(res => res.json())
-    .then(json => console.log(json))
-    .catch(er => console.log(er));
+function findCode (targetLang, langs) {
+  let response
+
+  langs.forEach(language => {
+    if (language.name.toLowerCase() === targetLang) {
+      response = language.code
+    }
+  })
+  return (response)
+}
+
+async function translateLang () {
+  const text = process.argv[2]
+  const [langs] = await translate.getLanguages()
+  const target = findCode(process.argv[3], langs)
+  const [translation] = await translate.translate(text, target)
+  console.log(`Text: ${text}`)
+  console.log(`Translation: ${translation}`)
+}
+
+translateLang()
